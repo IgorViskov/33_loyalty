@@ -56,8 +56,8 @@ func (r *OrdersResponse) MarshalJSON() ([]byte, error) {
 	middle["number"] = r.Number
 	middle["status"] = &r.Status
 	if r.Accrual.Valid {
-		accrual, _ := r.Accrual.Value()
-		middle["accrual"] = accrual
+		acc, _ := r.Accrual.Decimal.Float64()
+		middle["accrual"] = acc
 	}
 	middle["uploaded_at"] = r.UploadedAt.Format(time.RFC3339)
 	return json.Marshal(middle)
