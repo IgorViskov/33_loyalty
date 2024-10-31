@@ -1,6 +1,6 @@
 module github.com/IgorViskov/33_loyalty
 
-go 1.23.0
+go 1.22.8
 
 require (
 	github.com/caarlos0/env/v11 v11.2.2
