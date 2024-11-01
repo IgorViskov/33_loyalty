@@ -105,6 +105,9 @@ func (r *AccrualResponse) UnmarshalJSON(b []byte) error {
 		return apperrors.ErrNotValidJSON
 	}
 	r.Order, err = parseString(d)
+	if err != nil {
+		return apperrors.ErrNotValidJSON
+	}
 
 	d, ok = dat["status"]
 	if !ok {
@@ -145,6 +148,9 @@ func (r *WithdrawRequest) UnmarshalJSON(b []byte) error {
 		return apperrors.ErrNotValidJSON
 	}
 	r.Order, err = parseString(d)
+	if err != nil {
+		return apperrors.ErrNotValidJSON
+	}
 
 	d, ok = dat["sum"]
 	if !ok {
