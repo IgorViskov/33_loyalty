@@ -130,6 +130,30 @@ func (r *AccrualResponse) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (r *WithdrawRequest) UnmarshalJSON(b []byte) error {
+	var dat map[string]interface{}
+	var err error
+	if err = json.Unmarshal(b, &dat); err != nil {
+		return err
+	}
+
+	var d interface{}
+	var ok bool
+
+	d, ok = dat["order"]
+	if !ok {
+		return apperrors.ErrNotValidJSON
+	}
+	r.Order, err = parseString(d)
+
+	d, ok = dat["sum"]
+	if !ok {
+		return apperrors.ErrNotValidJSON
+	}
+	r.Sum, err = appmath.ParseDecimal(d)
+	return err
+}
+
 func parseString(val interface{}) (string, error) {
 	switch v := val.(type) {
 	case int:
