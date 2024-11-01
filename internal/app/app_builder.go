@@ -65,8 +65,8 @@ func (app *App) Build() *App {
 	bindUserContext(r, app.connector)
 	r.Use(AuthMiddleware)
 
-	bindUserApi(app.router)
-	bindOrderApi(app.router, app.connector, app.conf)
+	bindUserAPI(app.router)
+	bindOrderAPI(app.router, app.connector, app.conf)
 
 	return app
 }
@@ -80,7 +80,7 @@ func (app *App) Start() {
 
 func readFlags(conf *config.AppConfig) {
 	flag.Func("a", "Адрес запуска HTTP-сервера", config.HostNameParser(conf))
-	flag.Func("d", "Адрес подключения к базе данных", config.DbURIParser(conf))
+	flag.Func("d", "Адрес подключения к базе данных", config.DBURIParser(conf))
 	flag.Func("r", "Адрес системы расчёта начислений", config.AccrualHostParser(conf))
 
 	// запускаем парсинг
@@ -99,8 +99,8 @@ func checkConfig(conf *config.AppConfig) error {
 	if conf.AccrualHost == nil || conf.AccrualHost.Host == "" {
 		return apperrors.ErrNotValidAccrualHost
 	}
-	if conf.DbURI == "" {
-		return apperrors.ErrDbUriIsEmpty
+	if conf.DBURI == "" {
+		return apperrors.ErrDBURIIsEmpty
 	}
 
 	return nil
@@ -121,12 +121,12 @@ func bindUserContext(r *echo.Echo, con data.Connector) {
 	})
 }
 
-func bindUserApi(r *echo.Echo) {
+func bindUserAPI(r *echo.Echo) {
 	r.POST("/api/user/register", api.Register)
 	r.POST("/api/user/login", api.Login)
 }
 
-func bindOrderApi(r *echo.Echo, con data.Connector, conf *config.AppConfig) {
+func bindOrderAPI(r *echo.Echo, con data.Connector, conf *config.AppConfig) {
 	accruals := data.NewAccrualRepository(con)
 	tasks := data.NewAccrualTasksRepository(con)
 	account := services.NewAccountService(data.NewWithdrawalsRepository(con))

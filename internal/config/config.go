@@ -4,7 +4,7 @@ import "net/url"
 
 type AppConfig struct {
 	RunHost             string   `env:"RUN_ADDRESS"`
-	DbURI               string   `env:"DATABASE_URI"`
+	DBURI               string   `env:"DATABASE_URI"`
 	AccrualHost         *url.URL `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	MaxParallelRequests int      `env:"MAX_PARALLEL_REQUESTS"`
 	PeriodRequests      int      `env:"PERIOD_REQUESTS"`
@@ -28,9 +28,9 @@ func AccrualHostParser(conf *AppConfig) func(flagValue string) error {
 	}
 }
 
-func DbURIParser(conf *AppConfig) func(flagValue string) error {
+func DBURIParser(conf *AppConfig) func(flagValue string) error {
 	return func(flagValue string) error {
-		conf.DbURI = flagValue
+		conf.DBURI = flagValue
 		return nil
 	}
 }

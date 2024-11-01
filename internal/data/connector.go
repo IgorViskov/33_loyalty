@@ -22,7 +22,7 @@ type connector struct {
 
 func NewConnector(conf *config.AppConfig) Connector {
 	return &connector{
-		dbURI: conf.DbURI,
+		dbURI: conf.DBURI,
 	}
 }
 

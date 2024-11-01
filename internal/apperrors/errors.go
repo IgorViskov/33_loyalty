@@ -9,7 +9,7 @@ var (
 	ErrNonImplemented              = errors.New("not implemented")
 	InfoEmptyRunHost               = "run host is empty"
 	ErrNotValidAccrualHost         = errors.New("accrual host not valid")
-	ErrDbUriIsEmpty                = errors.New("db uri is empty")
+	ErrDBURIIsEmpty                = errors.New("db uri is empty")
 	ErrPairLoginPasswordNotValid   = errors.New("pair login password not valid")
 	ErrInvalidFormatRequest        = errors.New("invalid format request")
 	ErrRecordNotFound              = errors.New("record not found")

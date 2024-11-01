@@ -45,7 +45,7 @@ func (c *Controller) RegisterOrder(ec echo.Context) error {
 		}
 	}
 
-	err = c.service.Enqueue(uc.GetCtx(), orderNumber, *uc.UserService.GetUserID())
+	_ = c.service.Enqueue(uc.GetCtx(), orderNumber, *uc.UserService.GetUserID())
 
 	return uc.NoContent(http.StatusAccepted)
 }
@@ -73,7 +73,7 @@ func (c *Controller) Balance(ec echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return uc.JSON(http.StatusOK, result)
+	return uc.JSON(http.StatusOK, &result)
 }
 
 func (c *Controller) Withdraw(ec echo.Context) error {

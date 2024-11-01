@@ -48,6 +48,7 @@ func (e *externalAccrualService) GetAccrual(order string) (domain.Accrual, error
 	if err != nil {
 		return domain.Accrual{}, err
 	}
+	_ = response.Body.Close()
 	return domain.Accrual{
 		OrderNumber: order,
 		Status:      model.Status,

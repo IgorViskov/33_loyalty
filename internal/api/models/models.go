@@ -63,6 +63,33 @@ func (r *OrdersResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(middle)
 }
 
+func (r *AccrualResponse) MarshalJSON() ([]byte, error) {
+	middle := make(map[string]interface{})
+	middle["order"] = r.Order
+	middle["status"] = &r.Status
+	acc, _ := r.Accrual.Decimal.Float64()
+	middle["accrual"] = acc
+	return json.Marshal(middle)
+}
+
+func (r *BalanceResponse) MarshalJSON() ([]byte, error) {
+	middle := make(map[string]interface{})
+	cur, _ := r.Current.Float64()
+	middle["current"] = cur
+	wit, _ := r.Withdrawn.Float64()
+	middle["withdrawn"] = wit
+	return json.Marshal(middle)
+}
+
+func (r *WithdrawResponse) MarshalJSON() ([]byte, error) {
+	middle := make(map[string]interface{})
+	middle["order"] = r.Order
+	sum, _ := r.Sum.Float64()
+	middle["sum"] = sum
+	middle["processed_at"] = r.ProcessedAt.Format(time.RFC3339)
+	return json.Marshal(middle)
+}
+
 func (r *AccrualResponse) UnmarshalJSON(b []byte) error {
 	var dat map[string]interface{}
 	var err error
