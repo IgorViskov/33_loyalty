@@ -8,5 +8,5 @@ import (
 
 func AutoMigrate(connector data.Connector) error {
 	session := connector.GetConnection(context.Background())
-	return session.AutoMigrate(&domain.User{}, &domain.Accrual{}, &domain.AccrualTask{}, domain.Withdrawals{}, domain.PoisonQueueItem{})
+	return session.AutoMigrate(&domain.User{}, &domain.Accrual{}, &domain.AccrualTask{}, domain.Withdrawals{})
 }
