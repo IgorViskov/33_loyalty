@@ -16,14 +16,14 @@ func TestStatusToJson(t *testing.T) {
 	test := OrdersResponse{
 		Status:     statuses.PROCESSED,
 		Accrual:    appmath.ToNullable(decimal.MustParse("200.89")),
-		Number:     132456789,
+		Number:     "132456789",
 		UploadedAt: date,
 	}
 
 	data, err := json.Marshal(&test)
 
 	assert.NoError(t, err)
-	assert.JSONEq(t, string(data), `{"accrual":"200.89","number":132456789,"status":"PROCESSED","uploaded_at":"2025-01-01T18:05:00+03:00"}`)
+	assert.JSONEq(t, string(data), `{"accrual":200.89,"number": "132456789","status":"PROCESSED","uploaded_at":"2025-01-01T18:05:00+03:00"}`)
 }
 
 func TestPointsCalculationResponseFromJson(t *testing.T) {
@@ -44,7 +44,7 @@ func TestPointsCalculationResponseFromJson(t *testing.T) {
 			want: AccrualResponse{
 				Status:  statuses.PROCESSED,
 				Accrual: appmath.ToNullable(decimal.MustParse("200.89")),
-				Order:   9278923470,
+				Order:   "9278923470",
 			},
 			positive: true,
 		},
@@ -58,7 +58,7 @@ func TestPointsCalculationResponseFromJson(t *testing.T) {
 			want: AccrualResponse{
 				Status:  statuses.PROCESSED,
 				Accrual: appmath.ToNullable(decimal.MustParse("200.89")),
-				Order:   9278923470,
+				Order:   "9278923470",
 			},
 			positive: true,
 		},
@@ -72,7 +72,7 @@ func TestPointsCalculationResponseFromJson(t *testing.T) {
 			want: AccrualResponse{
 				Status:  statuses.PROCESSED,
 				Accrual: appmath.ToNullable(decimal.MustParse("200")),
-				Order:   9278923470,
+				Order:   "9278923470",
 			},
 			positive: true,
 		},
@@ -85,18 +85,9 @@ func TestPointsCalculationResponseFromJson(t *testing.T) {
 			want: AccrualResponse{
 				Status:  statuses.INVALID,
 				Accrual: decimal.NullDecimal{},
-				Order:   9278923470,
+				Order:   "9278923470",
 			},
 			positive: true,
-		},
-		{
-			name: "Bad response negative wrong order number #5",
-			json: `{
-					  "order": "_9278923470",
-					  "status": "INVALID"
-				  }`,
-			want:     AccrualResponse{},
-			positive: false,
 		},
 		{
 			name: "Bad response negative wrong status #6",
