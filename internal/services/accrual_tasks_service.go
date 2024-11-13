@@ -7,20 +7,21 @@ import (
 	"github.com/IgorViskov/33_loyalty/internal/domain"
 	"github.com/IgorViskov/33_loyalty/internal/domain/statuses"
 	"github.com/labstack/gommon/log"
+	"sync/atomic"
 	"time"
 )
 
 var instance *AccrualTasksService
 
 type AccrualTasksService struct {
-	pool           *core.WorkerPool[domain.AccrualTask, domain.Accrual]
+	pool           *core.WorkerPool[domain.AccrualTask]
 	tasks          domain.AccrualTaskRepository
 	accruals       domain.AccrualRepository
 	ticker         *time.Ticker
 	accrualService ExternalAccrualService
 	account        *AccountService
-	active         *core.SyncMap[string, int]
 	close          chan struct{}
+	isLoading      atomic.Bool
 }
 
 func NewAccrualTasksPool(conf *config.AppConfig, tasks domain.AccrualTaskRepository, accruals domain.AccrualRepository, external ExternalAccrualService, account *AccountService) *AccrualTasksService {
@@ -29,11 +30,10 @@ func NewAccrualTasksPool(conf *config.AppConfig, tasks domain.AccrualTaskReposit
 			tasks:          tasks,
 			accruals:       accruals,
 			ticker:         time.NewTicker(time.Duration(conf.PeriodRequests) * time.Second),
-			active:         core.NewSyncMap[string, int](),
 			accrualService: external,
 			account:        account,
 		}
-		instance.pool = core.NewWorkerPool[domain.AccrualTask, domain.Accrual](conf.MaxParallelRequests, instance.action, instance.handle)
+		instance.pool = core.NewWorkerPool[domain.AccrualTask](conf.MaxParallelRequests, instance.action)
 		go instance.start()
 	}
 	return instance
@@ -44,35 +44,25 @@ func (s *AccrualTasksService) Enqueue(in domain.AccrualTask) error {
 	return err
 }
 
-func (s *AccrualTasksService) action(in domain.AccrualTask) core.Result[domain.Accrual] {
-	s.active.Remove(in.OrderNumber)
+func (s *AccrualTasksService) action(in domain.AccrualTask) {
 	a, err := s.accrualService.GetAccrual(in.OrderNumber)
 	if err != nil {
 		log.Error(err)
-		return core.Failed[domain.Accrual](err)
+		return
 	}
 	a.UserID = in.UserID
 	a.UploadedAt = in.UploadedAt
 
-	return core.Done(&a)
-}
-
-func (s *AccrualTasksService) handle(r core.Result[domain.Accrual]) error {
-	if !r.Success() {
-		return r.Err()
-	}
-	a := r.Data()
 	if a.Status == statuses.INVALID || a.Status == statuses.PROCESSED {
-		err := s.removeTask(a.OrderNumber)
+		err = s.removeTask(a.OrderNumber)
 		if err != nil {
 			log.Error(err)
 		}
 	}
-	err := s.saveAccrual(a)
+	err = s.saveAccrual(&a)
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
 	}
-	return err
 }
 
 func (s *AccrualTasksService) removeTask(order string) error {
@@ -96,16 +86,17 @@ func (s *AccrualTasksService) start() {
 }
 
 func (s *AccrualTasksService) load() {
+	if s.isLoading.Load() {
+		return
+	}
+	s.isLoading.Store(true)
+	defer s.isLoading.Store(false)
 	tasks, err := s.tasks.All(context.Background())
 	if err != nil {
 		log.Error(err)
 		return
 	}
 	for _, task := range tasks {
-		if s.active.ContainsKey(task.OrderNumber) {
-			continue
-		}
-		s.active.Set(task.OrderNumber, 0)
 		s.pool.Run(task)
 	}
 }

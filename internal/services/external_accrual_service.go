@@ -13,7 +13,7 @@ import (
 	"slices"
 )
 
-var invalidStatuses []int = []int{http.StatusNoContent, http.StatusInternalServerError}
+var invalidStatuses = []int{http.StatusNoContent, http.StatusInternalServerError}
 
 type ExternalAccrualService interface {
 	GetAccrual(order string) (domain.Accrual, error)
@@ -57,7 +57,7 @@ func (e *externalAccrualService) GetAccrual(order string) (domain.Accrual, error
 }
 
 func (e *externalAccrualService) request(order string) *http.Request {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/orders/%s", e.url, order), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/orders/%s", e.url, order), http.NoBody)
 	if err != nil {
 		panic(err)
 	}

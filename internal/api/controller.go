@@ -40,9 +40,9 @@ func (c *Controller) RegisterOrder(ec echo.Context) error {
 	if a != nil {
 		if a.UserID == *uc.UserService.GetUserID() {
 			return uc.NoContent(http.StatusOK)
-		} else {
-			return uc.String(http.StatusConflict, apperrors.MsgOrderEasUploadedAnotherUser)
 		}
+
+		return uc.String(http.StatusConflict, apperrors.MsgOrderEasUploadedAnotherUser)
 	}
 
 	_ = c.service.Enqueue(uc.GetCtx(), orderNumber, *uc.UserService.GetUserID())

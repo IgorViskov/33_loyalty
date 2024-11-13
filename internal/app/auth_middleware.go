@@ -24,7 +24,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		claims := &models.Claims{}
-		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(_ *jwt.Token) (interface{}, error) {
 			return []byte(config.AuthSecretKey), nil
 		})
 		if err != nil {

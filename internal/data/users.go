@@ -32,9 +32,8 @@ func (s *UsersRepository) Insert(context context.Context, entity *domain.User) (
 	if result.RowsAffected == 0 {
 		if result.Error == nil {
 			return nil, apperrors.ErrInsertConflict
-		} else {
-			return nil, result.Error
 		}
+		return nil, result.Error
 	}
 	return entity, nil
 }

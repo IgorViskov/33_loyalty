@@ -31,9 +31,8 @@ func Register(c echo.Context) error {
 	if err != nil {
 		if errors.Is(err, apperrors.ErrInsertConflict) {
 			return uc.NoContent(http.StatusConflict)
-		} else {
-			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return authenticate(uc, model)
@@ -44,10 +43,8 @@ func authenticate(uc *UserContext, model models.AuthModel) error {
 	if err != nil {
 		if errors.Is(err, apperrors.ErrRecordNotFound) {
 			return uc.String(http.StatusUnauthorized, apperrors.ErrPairLoginPasswordNotValid.Error())
-		} else {
-			return uc.String(http.StatusUnauthorized, err.Error())
 		}
-
+		return uc.String(http.StatusUnauthorized, err.Error())
 	}
 	err = saveCookie(uc.Response().Writer, user.ID)
 	if err != nil {

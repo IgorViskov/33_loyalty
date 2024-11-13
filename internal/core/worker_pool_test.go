@@ -1,10 +1,8 @@
 package core
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"sync"
+	"github.com/stretchr/testify/assert"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -13,19 +11,13 @@ import (
 type ActionIn struct {
 	ID    int
 	Value string
-	ctx   context.Context
-}
-
-type ActionOut struct {
-	ID  int
-	err error
+	t     *testing.T
 }
 
 var poolSize int = 10
 var active = atomic.Int64{}
 var allCount = atomic.Int64{}
-var pool = NewWorkerPool((int)(poolSize), WorkerAction, WorkerHandler)
-var activeIds = sync.Map{}
+var pool = NewWorkerPool(poolSize, WorkerAction)
 var end = make(chan struct{})
 
 func TestWorkerPool(t *testing.T) {
@@ -35,6 +27,7 @@ func TestWorkerPool(t *testing.T) {
 			pool.Run(ActionIn{
 				ID:    i,
 				Value: fmt.Sprintf("%d", i),
+				t:     t,
 			})
 		}
 	}()
@@ -43,30 +36,15 @@ func TestWorkerPool(t *testing.T) {
 	pool.stop()
 }
 
-func WorkerAction(in ActionIn) Result[ActionOut] {
+func WorkerAction(in ActionIn) {
 	active.Add(1)
 	defer active.Add(-1)
-	activeIds.Store(in.ID, struct{}{})
-	time.Sleep(time.Millisecond * 1000)
-	var err error
+	time.Sleep(time.Millisecond * 10)
 	total := active.Load()
-	if total > int64(poolSize) {
-		err = errors.New("pool size exceeded")
-	}
-	fmt.Printf("Work ID [%d], Active count: [%d] \r\n", in.ID, total)
-	activeIds.Delete(in.ID)
-	return Done(&ActionOut{
-		ID:  in.ID,
-		err: err,
-	})
-}
-
-func WorkerHandler(r Result[ActionOut]) error {
+	assert.LessOrEqual(in.t, total, int64(poolSize))
 	allCount.Add(1)
 	count := allCount.Load()
-	fmt.Printf("Responce Id [%d] received by [%d] \r\n", r.data.ID, allCount.Load())
 	if count == int64(100) {
 		close(end)
 	}
-	return nil
 }
